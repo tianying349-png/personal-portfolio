@@ -858,7 +858,7 @@
                         <span class="richard-tag">3D AI Native / Spatial Interaction</span>
                         <p class="richard-desc lang-zh"><strong>[ What ]</strong> 一款基于 3D 沉浸式交互的 AI 原生灵感具象化应用。<br><strong>[ Why ]</strong> 传统的对话框难以承载发散性思维。我重构了 Prompt 与视觉的映射逻辑，让抽象灵感在 3D 空间中可视化生长，探索了下一代 AI 空间交互范式。</p>
                         <p class="richard-desc lang-en" style="font-family: 'Inter', sans-serif;"><strong>[ What ]</strong> An AI-native inspiration materialization app based on 3D immersive interaction.<br><strong>[ Why ]</strong> Traditional chat interfaces struggle to support divergent thinking. I refactored the mapping logic between Prompts and visuals, allowing abstract inspiration to grow visually in 3D space, exploring the next-generation paradigm of Spatial Interaction for AI.</p>
-                        <div class="qr-trigger" data-qr="https://img.heliar.top/file/1773303815700_c1inspire.png" style="font-size: 0.85rem; font-weight: bold; color: #FF8C00; cursor: pointer; display: inline-block; margin-top: 10px; width: fit-content;">[ <span class="lang-zh">扫码体验</span><span class="lang-en">Scan to Experience</span> ↗ ]</div>
+                        <div class="qr-trigger"  data-vpn="yes" data-qr="https://img.heliar.top/file/1773303815700_c1inspire.png" style="font-size: 0.85rem; font-weight: bold; color: #FF8C00; cursor: pointer; display: inline-block; margin-top: 10px; width: fit-content;">[ <span class="lang-zh">扫码体验</span><span class="lang-en">Scan to Experience</span> ↗ ]</div>
                     </div>
                 </div>
             </div>
@@ -975,6 +975,10 @@
         <div style="background: #fff; padding: 40px; border-radius: 4px; box-shadow: 0 20px 60px rgba(0,0,0,0.08); text-align: center; transform: translateY(20px); transition: transform 0.4s ease;" id="qr-card">
             <img id="qr-modal-img" src="" alt="体验二维码" style="width: 240px; height: 240px; display: block; margin: 0 auto; object-fit: contain;">
             <p style="font-family: 'Inter', sans-serif; font-size: 0.85rem; color: #888; margin-top: 20px; letter-spacing: 1px;"><span class="lang-zh">扫描二维码进行体验</span><span class="lang-en">Scan QR code to experience</span></p>
+<div id="vpn-tips" style="display: none; color: #FF8C00; font-size: 0.85rem; margin-top: 8px; font-weight: bold;">
+    <span class="lang-zh">（需连接 VPN 使用）</span>
+    <span class="lang-en" style="display:none;">(VPN Required)</span>
+</div>
         </div>
         <div id="qr-close" style="margin-top: 30px; font-family: 'Inter', sans-serif; font-size: 0.9rem; color: #666; cursor: pointer; letter-spacing: 2px; transition: color 0.3s ease;"><span class="lang-zh">关闭 (Close)</span><span class="lang-en">Close</span></div>
     </div>
@@ -1169,6 +1173,12 @@
               e.stopPropagation(); // 阻止事件冒泡
               const qrUrl = trigger.getAttribute('data-qr');
               qrModalImg.src = qrUrl;
+
+          // 判断是否需要显示 VPN 提示
+          const vpnTips = document.getElementById('vpn-tips');
+          if (vpnTips) {
+            vpnTips.style.display = trigger.getAttribute('data-vpn') === 'yes' ? 'block' : 'none';
+          }
 
               // 激流动效
               qrModal.style.pointerEvents = 'auto';
