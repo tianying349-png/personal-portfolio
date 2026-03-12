@@ -1,0 +1,1210 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>田莹莹 - 个人展示</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #F7F7F5;
+            --text-color: #222222;
+            --font-serif: "Noto Serif SC", "SimSun", "STSong", "Songti SC", serif;
+            --font-sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        html, body {
+            overflow-x: hidden;
+            width: 100%;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: var(--font-serif);
+            line-height: 1.8;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Hero Section */
+        .hero {
+            position: relative;
+            height: 100vh;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        #canvas-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            pointer-events: none; /* Let clicks pass through to links */
+        }
+
+        .hero-text {
+            z-index: 10;
+        }
+
+        .hero-text .title {
+            font-size: 2.2rem;
+            margin-bottom: 1rem;
+            line-height: 1.4;
+        }
+
+        .hero-text .subtitle {
+            font-size: 1.2rem;
+            color: #444;
+            line-height: 1.6;
+        }
+
+        .contact-info {
+            font-family: var(--font-sans);
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            z-index: 10;
+        }
+
+        .contact-info a {
+            color: var(--text-color);
+            text-decoration: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .contact-info a:hover {
+            opacity: 0.7;
+        }
+
+        .corner-arrow {
+            font-size: 0.6em;
+            position: relative;
+            top: -0.8em;
+            margin-left: 2px;
+            transition: color 0.3s ease;
+        }
+
+        /* 联系方式悬停时，箭头变成深橙色以呼应 3D 树的末端 */
+        .contact-link:hover .corner-arrow {
+            color: #FF8C00; 
+        }
+
+        .scroll-hint {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            z-index: 10;
+        }
+
+        .scroll-hint span {
+            font-family: var(--font-sans);
+            font-size: 0.75rem;
+            color: #999;
+            letter-spacing: 0.15em;
+            opacity: 0;
+            animation: waterfall 3s infinite;
+        }
+
+        .scroll-hint span:nth-child(1) { animation-delay: 0s; }
+        .scroll-hint span:nth-child(2) { animation-delay: 0.2s; }
+        .scroll-hint span:nth-child(3) { animation-delay: 0.4s; }
+        .scroll-hint span:nth-child(4) { animation-delay: 0.6s; }
+        .scroll-hint span:nth-child(5) { animation-delay: 0.8s; }
+
+        @keyframes waterfall {
+            0% { opacity: 0; transform: translateY(-10px); }
+            20% { opacity: 1; transform: translateY(0); }
+            60% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(10px); }
+        }
+
+        /* Content Section */
+        .content {
+            padding: 60px 0 40px 0;
+            width: 100%;
+            position: relative;
+            z-index: 10;
+            background-color: var(--bg-color);
+        }
+
+        .content-divider {
+            width: 90%;
+            height: 1px;
+            /* 渐变色呼应树的颜色：深棕 -> 海绿 -> 深橙，降低透明度显得浅浅的 */
+            background: linear-gradient(to right, rgba(92, 64, 51, 0.15), rgba(46, 139, 87, 0.25), rgba(255, 140, 0, 0.3));
+            margin: 0 auto 100px auto;
+        }
+
+        .section {
+            display: flex;
+            width: 100%;
+            margin-bottom: 120px;
+            justify-content: space-between;
+            align-items: baseline;
+        }
+
+        .label {
+            width: 20%;
+            padding-left: 80px;
+            box-sizing: border-box;
+            font-size: 0.8rem;
+            color: #666;
+            font-family: var(--font-sans);
+            letter-spacing: 0.1em;
+            padding-top: 0.4em; /* 抵消右侧大字号行高带来的视觉落差，实现顶部齐平 */
+        }
+
+        .text {
+            width: 60%;
+            box-sizing: border-box;
+            padding-right: 40px;
+            font-family: var(--font-serif);
+            font-size: 1.1rem;
+            line-height: 2;
+            color: #222;
+        }
+
+        .text p {
+            margin: 0 0 2em 0;
+            text-align: justify;
+            font-weight: 400;
+        }
+
+        .text p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* 极简学术公式容器 */
+        .academic-formula-box {
+            display: inline-block; /* 宽度收缩到文字边缘，解决右侧留白背景过大的问题 */
+            position: relative;
+            padding: 5px 0 5px 24px;
+            margin-bottom: 3.5em;
+            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        /* 左侧极其克制的极细灰线 */
+        .academic-formula-box::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 1px;
+            background-color: #D3D3D3;
+            transition: all 0.4s ease;
+        }
+
+        /* 悬停时的优雅反馈 */
+        .academic-formula-box:hover {
+            transform: translateX(8px); /* 整体微微向右浮动 */
+        }
+
+        .academic-formula-box:hover::before {
+            background-color: #FF8C00; /* 左侧细线变成深橙色 */
+            width: 2px; /* 细线稍微加粗 */
+        }
+
+        /* 公式内强调字母的悬停变色 */
+        .academic-formula-box .math-letter {
+            transition: color 0.4s ease;
+        }
+        .academic-formula-box:hover .math-letter {
+            color: #FF8C00;
+        }
+
+        /* Bottom Section */
+        .bottom-section {
+            width: 100%;
+            padding-bottom: 80px; /* Space for sticky nav */
+            background-color: var(--bg-color);
+            position: relative;
+            z-index: 10;
+        }
+
+        .photo-container {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            margin-bottom: 120px;
+        }
+
+        .photo-container img {
+            width: 800px;
+            height: 600px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .black-bar {
+            width: 100%;
+            background-color: #111;
+            color: #fff;
+            height: 200px;
+            display: flex;
+            align-items: center;
+        }
+
+        .thanks {
+            padding-left: 80px;
+            font-size: 4.5rem;
+            font-family: var(--font-serif);
+            letter-spacing: 0.05em;
+        }
+
+        /* Sticky Footer Nav */
+        .footer-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: #F7F7F5;
+            border-top: 1px solid #ddd;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            height: 80px;
+            z-index: 1000;
+            color: #222;
+        }
+
+        /* 导航项基础样式 */
+        .nav-item {
+            flex: 1;
+            text-align: center;
+            padding: 30px 0;
+            font-family: 'Noto Serif SC', serif;
+            font-size: 1.5rem;
+            color: #666; /* 默认灰色文字 */
+            cursor: pointer;
+            position: relative; 
+            overflow: hidden; /* 核心：隐藏还没推上来的黑色木块 */
+            background-color: transparent;
+            transition: color 0.4s ease;
+            z-index: 1; /* 确保文字在最上层 */
+        }
+
+        /* 核心魔法：隐藏在底部的“黑色木块” */
+        .nav-item::before {
+            content: '';
+            position: absolute;
+            bottom: 0; /* 锚定在最底部 */
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #111; /* 极简的深黑色实体块 */
+            transform: translateY(100%); /* 初始状态：100% 被推到格子下方，看不见 */
+            transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1); /* 高级物理阻尼感 */
+            z-index: -1; /* 垫在文字下面 */
+        }
+
+        /* 悬停或激活时：木块推上来，文字变白 */
+        .nav-item:hover::before,
+        .nav-item.active::before {
+            transform: translateY(0); /* 木块瞬间平滑推满整个格子 */
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            color: #fff; /* 文字反白，确保在黑底上清晰可见 */
+        }
+
+        /* 箭头的动效保留：深橙色点缀与右上角弹射 */
+        .nav-arrow {
+            font-size: 0.8rem;
+            vertical-align: super;
+            margin-left: 5px;
+            color: inherit;
+            opacity: 0.5;
+            display: inline-block;
+            transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        .nav-item:hover .nav-arrow,
+        .nav-item.active .nav-arrow {
+            color: #FF8C00; /* 标志性的深橙色 */
+            opacity: 1;
+            transform: translate(4px, -4px);
+        }
+
+        /* --- 空间跳跃全局动效准备 --- */
+        body {
+            transition: filter 0.5s ease, transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        .jump-out {
+            filter: blur(8px);
+            transform: scale(0.96); /* 页面微微后退缩小的错觉 */
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .label {
+                padding-left: 40px;
+            }
+            .photo-container img {
+                width: 90%;
+                height: auto;
+                aspect-ratio: 4/3;
+            }
+            .thanks {
+                left: 40px;
+                font-size: 3.5rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero-text .title {
+                font-size: 1.8rem;
+            }
+            .hero-text .subtitle {
+                font-size: 1rem;
+            }
+            .section {
+                flex-direction: column;
+                margin-bottom: 100px;
+            }
+            .label {
+                width: 100%;
+                padding-left: 20px;
+                margin-bottom: 20px;
+            }
+            .text {
+                width: 100%;
+                padding: 0 20px;
+            }
+            .photo-container {
+                margin-bottom: 60px;
+            }
+            .photo-container img {
+                width: 100%;
+                border-radius: 0;
+            }
+            .black-bar {
+                height: 140px;
+            }
+            .thanks {
+                font-size: 2.5rem;
+                padding-left: 20px;
+            }
+            .footer-nav {
+                height: 60px;
+            }
+            .nav-item {
+                font-size: 1.1rem;
+            }
+        }
+        /* 底部个人照片的悬停色彩唤醒动效 */
+        .profile-photo-container {
+            position: relative;
+            overflow: hidden;
+            border-radius: 4px; /* 直角偏柔和 */
+            width: 100%; 
+            max-width: 600px;
+            background-color: #F7F7F5; /* 确保背景色和网页一致，用于混合 */
+            box-shadow: 0 5px 20px rgba(0,0,0,0.03); /* 极其轻微的阴影 */
+            transition: all 1.2s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .profile-photo-container img {
+            /* 默认带有色彩，但使用 Multiply 模式融合入暖灰画布 */
+            mix-blend-mode: multiply; /* 这能柔化、降低色彩亮度 */
+            filter: saturate(50%) brightness(95%); /* 辅助轻微降低饱和度和亮度 */
+            opacity: 0.9; /* 增强融合感 */
+            transition: all 1.2s cubic-bezier(0.23, 1, 0.32, 1);
+            width: 100%;
+            height: auto;
+            display: block;
+            position: relative;
+            z-index: 1; /* 在波纹下方 */
+        }
+
+        /* 附赠魔法：极细微的动态波纹纹理 */
+        .profile-photo-container::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: radial-gradient(circle, #D3D3D3 1%, transparent 1%);
+            background-size: 15px 15px;
+            opacity: 0.08; /* 极低不透明度，像水波纹纹理 */
+            z-index: 2; /* 在图片上方 */
+            transition: all 1.2s ease;
+        }
+
+        /* 悬停时的温情唤醒 */
+        .profile-photo-container:hover {
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08); /* 悬停时轻微浮起 */
+        }
+
+        .profile-photo-container:hover img {
+            /* 关键：悬停时，恢复 100% 真实色彩 (Normal 模式) */
+            mix-blend-mode: normal;
+            filter: saturate(100%) brightness(100%);
+            opacity: 1;
+            transform: scale(1.01); /* 极其轻微的呼吸感放大 */
+        }
+
+        /* 悬停时，波纹纹理消失 */
+        .profile-photo-container:hover::after {
+            opacity: 0;
+        }
+
+        /* Richard Ekwonye 风格：巨型序号与不对称网格 */
+        .richard-list-container {
+            border-top: 1px solid #222; /* 顶部粗线压阵 */
+        }
+        .richard-work-item {
+            display: grid;
+            grid-template-columns: 20% 80%; /* 经典的二八开不对称网格 */
+            padding: 80px 0;
+            border-bottom: 1px solid #E0E0E0;
+            align-items: flex-start;
+            transition: background-color 0.4s ease;
+            cursor: pointer;
+        }
+
+        .richard-work-item:hover {
+            background-color: #FDFDFB; /* 悬停时背景极其轻微的提亮 */
+        }
+
+        /* 巨型序号 */
+        .richard-number {
+            font-family: 'Inter', sans-serif;
+            font-size: 4rem; /* 巨大的数字 */
+            font-weight: 300;
+            color: #222;
+            line-height: 1;
+            margin: 0;
+        }
+
+        /* 右侧内容区容器 */
+        .richard-content {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 巨大的衬线体标题 */
+        .richard-title {
+            font-family: 'Noto Serif SC', serif;
+            font-size: 4.5rem;
+            font-weight: 500;
+            color: #111;
+            line-height: 1.1;
+            margin: 0 0 24px 0;
+            letter-spacing: -1px;
+            transition: transform 0.4s ease, color 0.4s ease;
+        }
+
+        .richard-work-item:hover .richard-title {
+            transform: translateX(15px); /* 悬停时标题优雅右移 */
+            color: #FF8C00;
+        }
+
+        /* 标签与文案排版 */
+        .richard-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            width: 75%; /* 控制文案宽度，留出呼吸感 */
+        }
+
+        .richard-tag {
+            font-size: 0.85rem;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .richard-desc {
+            font-family: 'Inter', sans-serif;
+            font-size: 1.15rem;
+            line-height: 1.8;
+            color: #444;
+            margin: 0;
+        }
+
+        /* --- 爱好板块全局修复 --- */
+        #more-section {
+            width: 100%;
+            padding: 120px 0; /* 取消左右 padding，让画廊贯穿全屏边界 */
+            background-color: #FAFAFA;
+            overflow: hidden; /* 隐藏屏幕外的内容 */
+        }
+        .more-header {
+            padding: 0 5%;
+            max-width: 1200px;
+            margin: 0 auto 60px auto;
+        }
+
+        /* 画廊轨道容器 */
+        .gallery-track-container {
+            width: 100%;
+            margin-bottom: 60px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* 跑马灯动画轨道 */
+        .marquee-track {
+            display: flex;
+            gap: 20px;
+            width: max-content;
+            /* 悬停时，动画平滑暂停 */
+            transition: filter 0.5s ease;
+        }
+
+        .marquee-track:hover {
+            animation-play-state: paused !important;
+        }
+
+        /* 聚光灯：悬停轨道时，未被 Hover 的图片变暗并变为灰度 */
+        .marquee-track:hover .marquee-item {
+            filter: grayscale(80%) brightness(0.6);
+            transform: scale(0.95);
+        }
+
+        /* 单张图片的魔法 */
+        .marquee-item {
+            height: 320px; /* 统一高度，形成整齐的水平线 */
+            /* 注意：这里删除了之前固定的 width: 400px; */
+            border-radius: 4px;
+            overflow: hidden;
+            flex-shrink: 0; /* 保证在滚动条里不被挤压 */
+            transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+            cursor: pointer;
+        }
+
+        /* 图片本体：保持真实比例 */
+        .marquee-item img {
+            height: 100%;
+            width: auto; /* 核心魔法：高度 100% 时，宽度自动按原图比例伸缩 */
+            display: block;
+            transition: transform 0.8s ease;
+        }
+
+        /* 悬停单张图片时：恢复色彩、放大、解除变暗 */
+        .marquee-track .marquee-item:hover {
+            filter: grayscale(0%) brightness(1) !important;
+            transform: scale(1.05) !important;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+            z-index: 10;
+        }
+
+        .marquee-item:hover img {
+            transform: scale(1.1); /* 内部图片微放大视差 */
+        }
+
+        /* 向左与向右的无缝滚动动画 */
+        @keyframes scrollLeft {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); } /* 需复制一份内容以实现无缝 */
+        }
+        @keyframes scrollRight {
+            0% { transform: translateX(-50%); }
+            100% { transform: translateX(0); }
+        }
+
+        .animate-left {
+            animation: scrollLeft 30s linear infinite;
+        }
+        .animate-right {
+            animation: scrollRight 35s linear infinite;
+        }
+
+        /* 文本介绍卡片 */
+        .gallery-info {
+            padding: 0 5%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* 📱 移动端适配：当屏幕小于 768px 时 */
+        @media (max-width: 768px) {
+            #more-section {
+                padding: 60px 0; /* 缩小 Padding */
+            }
+            .marquee-item {
+                height: 200px;
+            }
+        }
+        
+        /* 语言切换器样式 */
+        .lang-switcher {
+            position: fixed;
+            top: 40px;
+            right: 5%;
+            z-index: 1000;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #666;
+            cursor: pointer;
+            letter-spacing: 1px;
+            transition: color 0.4s ease;
+            user-select: none;
+        }
+        .lang-switcher:hover {
+            color: #FF8C00;
+        }
+        
+        /* 语言显示控制 */
+        .lang-en {
+            display: none;
+        }
+        body.en-mode .lang-zh {
+            display: none;
+        }
+        body.en-mode .lang-en {
+            display: inline; /* 默认使用 inline，块级元素可以在行内样式覆盖或使用其他类 */
+        }
+        /* 针对块级元素的语言切换 */
+        body.en-mode div.lang-en,
+        body.en-mode p.lang-en,
+        body.en-mode h1.lang-en,
+        body.en-mode h2.lang-en,
+        body.en-mode h3.lang-en {
+            display: block;
+        }
+        body.en-mode span.lang-en {
+            display: inline;
+        }
+
+        /* 📱 移动端响应式终极适配 (Mobile Responsiveness) */
+        @media (max-width: 768px) {
+          
+          /* --- 1. 作品区 (Works Section) 修复 --- */
+          .richard-work-item {
+            grid-template-columns: 1fr; /* 核心：取消二八开分栏，改为完全上下堆叠 */
+            padding: 40px 0; /* 减小卡片上下的留白 */
+            gap: 10px; /* 数字和标题之间留一点呼吸空间 */
+          }
+          
+          .richard-number {
+            font-size: 2rem; /* 大幅缩小巨型序号 */
+            color: #888; /* 手机端序号颜色稍微调弱，避免抢戏 */
+          }
+          
+          .richard-title {
+            font-size: 2.2rem; /* 大幅缩小标题，彻底解决重叠溢出问题 */
+            line-height: 1.2;
+            margin-bottom: 15px;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+          }
+          
+          .richard-meta {
+            width: 100%; /* 文案释放宽度，占满手机屏幕 */
+          }
+          
+          /* --- 2. 更多板块 (More Section) 修复 --- */
+          .more-header {
+            padding: 0 20px;
+          }
+          #more-section .more-header h2 {
+            font-size: 2rem !important; /* 缩小“代码之外的系统构建”主标题 */
+          }
+          
+          .gallery-info {
+            padding: 0 20px; /* 移除多余的左右内边距，保留基础边距 */
+          }
+          
+          .gallery-info h3 {
+            font-size: 1.3rem !important; /* 缩小爱好模块的标题 */
+          }
+          
+          .gallery-info p {
+            font-size: 0.95rem !important; /* 稍微调小正文字号 */
+          }
+          
+          /* 缩小底层认知系统那个黑块的内边距 */
+          #more-section .gallery-info > div {
+            padding: 30px 20px !important; 
+          }
+          
+          #more-section .gallery-info > div h3 {
+            font-size: 1.6rem !important;
+          }
+          
+          /* --- 3. 底部导航栏 (Nav Bar) 微调 --- */
+          .nav-item {
+            font-size: 1.1rem; /* 缩小导航文字，防止三个字挤在一起 */
+            padding: 18px 0; /* 稍微降低导航栏高度，给正文留出更多空间 */
+          }
+          
+          /* --- 4. 首屏文本 (Hero Text) 修复 --- */
+          .hero-main-text {
+              font-size: 1.8rem !important;
+              top: 12% !important;
+              word-wrap: break-word;
+              overflow-wrap: break-word;
+          }
+          .hero-sub-text {
+              font-size: 1.1rem !important;
+          }
+          
+          /* --- 5. 公式框 (Formula Box) 修复 --- */
+          .academic-formula-box {
+              max-width: 100%;
+              overflow-x: auto;
+          }
+          .academic-formula-box > div:first-child {
+              font-size: 2rem !important;
+          }
+          .academic-formula-box sup {
+              font-size: 1rem !important;
+          }
+        }
+    </style>
+</head>
+<body>
+    
+    <!-- 语言切换按钮 -->
+    <div class="lang-switcher" id="lang-btn">EN / 中文</div>
+
+    <div class="hero" id="hero-section">
+        <!-- 3D Canvas Container -->
+        <div id="canvas-container"></div>
+
+        <!-- 左上角宣言 -->
+        <div class="hero-main-text" style="position: absolute; top: 8%; left: 5%; max-width: 90%; font-family: 'Noto Serif SC', 'Songti SC', SimSun, serif; font-size: 2.4rem; line-height: 1.6; color: #222222; letter-spacing: 0.02em;">
+            <span class="lang-zh">你好，<br>
+            <span class="hero-sub-text" style="font-size: 1.6rem; line-height: 1.35; display: inline-block; margin-top: 4px;">我是田莹莹，致力于构建沉浸式 AI<br>体验的探索者。</span></span>
+            <span class="lang-en" style="font-family: 'Inter', sans-serif; font-weight: 500; letter-spacing: -0.02em;">Hello,<br>
+            <span class="hero-sub-text" style="font-size: 1.6rem; line-height: 1.35; display: inline-block; margin-top: 4px; font-weight: 400;">I'm Tian Yingying, a builder dedicated to crafting immersive AI<br>experiences.</span></span>
+        </div>
+        
+        <!-- 左下角联系方式 -->
+        <div style="position: absolute; bottom: 120px; left: 5%; font-family: 'Inter', sans-serif; font-size: 0.9rem; letter-spacing: 1px; line-height: 1.8; z-index: 10;">
+            <a href="mailto:tyyianing@163.com" class="contact-link" style="text-decoration: none; color: #222; display: block;">
+                tyyianing@163.com<span class="corner-arrow">↗</span>
+            </a>
+            <a href="tel:+8613120043916" class="contact-link" style="text-decoration: none; color: #222; display: block;">
+                +86 13120043916<span class="corner-arrow">↗</span>
+            </a>
+        </div>
+
+        <!-- 右下角滑动引导 -->
+        <div class="scroll-hint" style="position: absolute; bottom: 120px; right: 5%; text-align: right;">
+            <span class="lang-zh">滑动浏览</span><span class="lang-en">Scroll to Explore</span>
+            <span class="lang-zh">滑动浏览</span><span class="lang-en">Scroll to Explore</span>
+            <span class="lang-zh">滑动浏览</span><span class="lang-en">Scroll to Explore</span>
+            <span class="lang-zh">滑动浏览</span><span class="lang-en">Scroll to Explore</span>
+            <span class="lang-zh">滑动浏览</span><span class="lang-en">Scroll to Explore</span>
+        </div>
+    </div>
+    
+    <div class="content">
+        <div class="content-divider"></div>
+        <div class="section">
+            <div class="label"><span class="lang-zh">序幕</span><span class="lang-en">Prologue</span></div>
+            <div class="text">
+                <div class="lang-zh">
+                    <p>任何伟大的产品创新，都始于对底层逻辑的敬畏。</p>
+                    <p>凭借财务管理学科背景，我在数千份审计底稿与财务模型中锤炼出极度严谨的数据ROI思维。当步入大语言模型时代，我惊喜地发现，这种探寻“第一性原理”的方法论在AI领域同样焕发生机。</p>
+                    <p>产品设计正如一棵倒立生长的树：向下，深深扎根于理性的数据基座与模型算法；向上，则生长出温暖、包容且极具同理心的人机交互。从搭建智能体，到主导 3D 沉浸式 AI 原生应用，我始终致力于充当那座连接“复杂技术边界”与“完美用户体验”的桥梁。</p>
+                </div>
+                <div class="lang-en" style="font-family: 'Inter', sans-serif;">
+                    <p>Any great product innovation begins with a reverence for underlying logic.</p>
+                    <p>With a background in Financial Management, I forged an extremely rigorous data-ROI mindset through thousands of audit working papers and financial models. Entering the era of Large Language Models, I was thrilled to discover that this methodology of seeking "First Principles" is equally vital in the AI domain.</p>
+                    <p>Product design is like an inverted tree: downwards, it roots deeply in rational data foundations and model algorithms; upwards, it grows into warm, inclusive, and highly empathetic human-computer interactions. From building AI agents to leading 3D immersive AI-native applications, I am committed to being the bridge connecting "complex technical boundaries" with "flawless user experiences."</p>
+                </div>
+            </div>
+            <div style="width: 10%;"></div>
+        </div>
+        
+        <div class="section" style="align-items: flex-start;">
+            <div class="label" style="margin-top: 15px; padding-top: 0;"><span class="lang-zh">产品公式</span><span class="lang-en">Product Formula</span></div>
+            <div class="text">
+                <div class="academic-formula-box">
+                    <div style="font-family: 'Times New Roman', Times, serif; font-size: 2.8rem; font-style: italic; letter-spacing: 0.04em; margin-bottom: 0.3em; font-weight: 500; color: #111;">
+                        <span class="math-letter">V</span> = ( <span class="math-letter">D</span> × <span class="math-letter">A</span> )<sup style="font-size: 1.4rem; font-style: normal; margin-left: 2px;"><span class="math-letter">E</span></sup>
+                    </div>
+                    <div style="font-size: 0.85rem; color: #888; letter-spacing: 1.5px; font-family: 'Inter', sans-serif; text-transform: uppercase;">
+                        Value = [ Data × AI ] <sup style="font-size: 0.65rem;">Empathy</sup>
+                    </div>
+                </div>
+                <div class="lang-zh">
+                    <p style="margin-bottom: 2em;">在我的产品准则中，严谨的数据（Data）与前沿的技术（AI）只是构建价值的基础乘数。无论是拆解复杂的账簿凭证，还是利用 Vibe Coding 快速跑通一个应用，如果缺乏对真实业务场景的洞察，技术往往会沦为空中楼阁。</p>
+                    <p style="margin-bottom: 0;">真正的产品灵魂，来自于“同理心（Empathy）”这个指数级驱动力。它意味着产品人必须从屏幕前的代码中走出来，下沉到真实的泥土与生活中——去倾听农户在录入房屋信息时的切实痛点，去感知年轻用户面对非遗文化时的真正诉求。只有贴近这些真实的呼吸，才能让冰冷的大模型产生质变，生长为解决现实社会与商业问题的最优解法。</p>
+                </div>
+                <div class="lang-en" style="font-family: 'Inter', sans-serif;">
+                    <p style="margin-bottom: 2em;">In my product principles, rigorous Data and cutting-edge AI are merely the foundational multipliers for value creation. Whether dissecting complex accounting vouchers or leveraging Agile Workflow to rapidly prototype an application, technology often becomes a castle in the air without deep insights into real-world business scenarios.</p>
+                    <p style="margin-bottom: 0;">The true soul of a product stems from "Empathy" as an exponential driver. It means product managers must step away from the code on the screen and dive into the reality of life—to listen to the tangible pain points of farmers inputting housing data, and to perceive the genuine needs of young users engaging with intangible cultural heritage. Only by staying close to these real breaths can cold large models undergo a qualitative transformation, growing into the optimal solutions for real-world social and business problems.</p>
+                </div>
+            </div>
+            <div style="width: 10%;"></div>
+        </div>
+    </div>
+    
+    <div id="works-section" style="width: 100%; padding: 120px 5%; position: relative; z-index: 10; min-height: 100vh;">
+        <div style="font-size: 0.8rem; color: #666; margin-bottom: 60px; text-transform: uppercase; letter-spacing: 2px;">Recent Projects</div>
+        
+        <div class="richard-list-container">
+            <div class="richard-work-item">
+                <div class="richard-number">01/</div>
+                <div class="richard-content">
+                    <h2 class="richard-title"><span class="lang-zh">灵感森林</span><span class="lang-en">Inspiration Forest</span></h2>
+                    <div class="richard-meta">
+                        <span class="richard-tag">3D AI Native / Spatial Interaction</span>
+                        <p class="richard-desc lang-zh"><strong>[ What ]</strong> 一款基于 3D 沉浸式交互的 AI 原生灵感具象化应用。<br><strong>[ Why ]</strong> 传统的对话框难以承载发散性思维。我重构了 Prompt 与视觉的映射逻辑，让抽象灵感在 3D 空间中可视化生长，探索了下一代 AI 空间交互范式。</p>
+                        <p class="richard-desc lang-en" style="font-family: 'Inter', sans-serif;"><strong>[ What ]</strong> An AI-native inspiration materialization app based on 3D immersive interaction.<br><strong>[ Why ]</strong> Traditional chat interfaces struggle to support divergent thinking. I refactored the mapping logic between Prompts and visuals, allowing abstract inspiration to grow visually in 3D space, exploring the next-generation paradigm of Spatial Interaction for AI.</p>
+                        <div class="qr-trigger" data-qr="https://picsum.photos/400/400?random=99" style="font-size: 0.85rem; font-weight: bold; color: #FF8C00; cursor: pointer; display: inline-block; margin-top: 10px; width: fit-content;">[ <span class="lang-zh">扫码体验</span><span class="lang-en">Scan to Experience</span> ↗ ]</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="richard-work-item">
+                <div class="richard-number">02/</div>
+                <div class="richard-content">
+                    <h2 class="richard-title"><span class="lang-zh">沉浸式专注工具</span><span class="lang-en">Immersive Focus Tool</span></h2>
+                    <div class="richard-meta">
+                        <span class="richard-tag">Vibe Coding / Flow Experience</span>
+                        <p class="richard-desc lang-zh"><strong>[ What ]</strong> 一款结合动态物理视觉（拟真雨滴）与待办清单的极简专注力工具。<br><strong>[ Why ]</strong> 为解决深度学习时的注意力涣散痛点。利用 Vibe Coding 快速构建，通过可自定义风力、光影的“视觉白噪音”，探索空间氛围对用户心流状态的积极干预。</p>
+                        <p class="richard-desc lang-en" style="font-family: 'Inter', sans-serif;"><strong>[ What ]</strong> A minimalist focus tool combining dynamic physical visuals (realistic raindrops) with a to-do list.<br><strong>[ Why ]</strong> To solve the pain point of attention distraction during deep learning. Rapidly built using Agile Workflow, it explores positive interventions on users' Flow Experience through customizable "visual white noise" like wind and lighting.</p>
+                        <div class="qr-trigger" data-qr="https://picsum.photos/400/400?random=98" style="font-size: 0.85rem; font-weight: bold; color: #FF8C00; cursor: pointer; display: inline-block; margin-top: 10px; width: fit-content;">[ <span class="lang-zh">扫码体验</span><span class="lang-en">Scan to Experience</span> ↗ ]</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="richard-work-item">
+                <div class="richard-number">03/</div>
+                <div class="richard-content">
+                    <h2 class="richard-title"><span class="lang-zh">春幸茶事小程序</span><span class="lang-en">Chunxing Tea Mini Program</span></h2>
+                    <div class="richard-meta">
+                        <span class="richard-tag">MVP Design / O2O Operation</span>
+                        <p class="richard-desc lang-zh"><strong>[ What ]</strong> 为推广校园非遗茶文化打造的轻量化 O2O 微信小程序原型。<br><strong>[ Why ]</strong> 传统文化缺乏年轻化的低门槛触点。基于 300+ 份真实调研，我主导了“线上科普+线下预约”的业务流设计。以低于预算的成本跑通推广闭环，实现 1500+ 人次转化。</p>
+                        <p class="richard-desc lang-en" style="font-family: 'Inter', sans-serif;"><strong>[ What ]</strong> A lightweight O2O WeChat Mini Program MVP designed to promote intangible cultural heritage tea culture on campus.<br><strong>[ Why ]</strong> Traditional culture lacks low-barrier touchpoints for younger demographics. Based on 300+ real user researches, I led the business flow design of "online education + offline booking." We successfully validated the promotional loop under budget, achieving 1500+ conversions.</p>
+                        <div class="qr-trigger" data-qr="https://picsum.photos/400/400?random=97" style="font-size: 0.85rem; font-weight: bold; color: #FF8C00; cursor: pointer; display: inline-block; margin-top: 10px; width: fit-content;">[ <span class="lang-zh">扫码体验</span><span class="lang-en">Scan to Experience</span> ↗ ]</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="richard-work-item">
+                <div class="richard-number">04/</div>
+                <div class="richard-content">
+                    <h2 class="richard-title"><span class="lang-zh">物资智能体</span><span class="lang-en">Inventory Agent</span></h2>
+                    <div class="richard-meta">
+                        <span class="richard-tag">Coze / Automation Bot</span>
+                        <p class="richard-desc lang-zh"><strong>[ What ]</strong> 基于 Coze 平台编排的自动化问答与物资调配智能体。<br><strong>[ Why ]</strong> 社团物资流转常因人工对接导致信息滞后。我将大模型深入具体业务流，用自动化 Bot 接管繁杂的统筹工作，验证了 AI 在长尾管理场景下的直接提效能力。</p>
+                        <p class="richard-desc lang-en" style="font-family: 'Inter', sans-serif;"><strong>[ What ]</strong> An automated Q&A and inventory allocation agent orchestrated on the Coze platform.<br><strong>[ Why ]</strong> Club inventory circulation often suffers from information lag due to manual coordination. I integrated LLMs deep into specific business workflows, using an automated Bot to take over tedious coordination tasks, validating AI's direct efficiency-boosting capabilities in long-tail management scenarios.</p>
+                        <div class="qr-trigger" data-qr="https://picsum.photos/400/400?random=96" style="font-size: 0.85rem; font-weight: bold; color: #FF8C00; cursor: pointer; display: inline-block; margin-top: 10px; width: fit-content;">[ <span class="lang-zh">扫码体验</span><span class="lang-en">Scan to Experience</span> ↗ ]</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="more-section">
+        <div class="more-header">
+            <div style="font-size: 0.8rem; color: #666; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 2px;"><span class="lang-zh">旷野与精神 (OFF-SCREEN)</span><span class="lang-en">Wilderness & Spirit (OFF-SCREEN)</span></div>
+            <h2 style="font-family: 'Noto Serif SC', serif; font-size: 3rem; margin: 0; color: #111;"><span class="lang-zh">代码之外的系统构建。</span><span class="lang-en" style="font-family: 'Inter', sans-serif; font-weight: 600; letter-spacing: -0.02em;">System Building Beyond Code.</span></h2>
+        </div>
+        <div class="gallery-info">
+            <h3 style="font-family: 'Noto Serif SC', serif; font-size: 1.5rem; margin: 0 0 10px 0;"><span class="lang-zh">01 / 寻路与控盘 (Orienteering)</span><span class="lang-en" style="font-family: 'Inter', sans-serif; font-weight: 600;">01 / Pathfinding & Control (Orienteering)</span></h3>
+            <p class="lang-zh" style="font-size: 0.95rem; color: #666; max-width: 600px; margin-bottom: 20px;">相比于纯粹的个人跑图，我更享受在复杂地形中构建规则与秩序的过程。在统筹校定向越野赛事的那些日子里，从规划路线、协调资源到把控突发状况，拿着地图在未知中寻找最优解的直觉，逐渐内化为了我以项目负责人视角控盘全局、应对模糊业务边界的能力。</p>
+            <p class="lang-en" style="font-size: 0.95rem; color: #666; max-width: 600px; margin-bottom: 20px; font-family: 'Inter', sans-serif;">Compared to purely individual running, I enjoy the process of building rules and order in complex terrains more. During the days of coordinating university orienteering events, from planning routes and aligning resources to managing emergencies, the intuition of finding the optimal solution in the unknown with a map gradually internalized into my ability to control the big picture and navigate ambiguous business boundaries from a project owner's perspective.</p>
+        </div>
+        <div class="marquee-track animate-left">
+            <div class="marquee-item"><img src="https://img.heliar.top/file/1773243504818_mmexport1678085289133.jpg" alt="地图1"></div>
+            <div class="marquee-item"><img src="https://img.heliar.top/file/1773243485870_微信图片_20260311220208_65_33.jpg" alt="地图2"></div>
+            <div class="marquee-item"><img src="https://img.heliar.top/file/1773243475429_微信图片_20260311220207_64_33.jpg" alt="地图3"></div>
+            <div class="marquee-item"><img src="https://img.heliar.top/file/1773243472739_微信图片_20260311220206_63_33.jpg" alt="地图4"></div>
+            <div class="marquee-item"><img src="https://img.heliar.top/file/1773243426858_微信图片_20260311220204_61_33.jpg" alt="地图1"></div>
+            <div class="marquee-item"><img src="https://img.heliar.top/file/1773243439606_定向体验赛.路线_2.jpg" alt="地图2"></div>
+            <div class="marquee-item"><img src="https://img.heliar.top/file/1773243406089_1691595885848.jpeg" alt="地图3"></div>
+            <div class="marquee-item"><img src="https://img.heliar.top/file/1773243403573_1691595805322.jpeg" alt="地图4"></div>
+        </div>
+        <div style="height: 60px;"></div> 
+        <div class="gallery-info">
+            <h3 style="font-family: 'Noto Serif SC', serif; font-size: 1.5rem; margin: 0 0 10px 0;"><span class="lang-zh">02 / 虚实之间的审美 (Photography)</span><span class="lang-en" style="font-family: 'Inter', sans-serif; font-weight: 600;">02 / Aesthetics Between Virtual and Reality (Photography)</span></h3>
+            <p class="lang-zh" style="font-size: 0.95rem; color: #666; max-width: 600px; margin-bottom: 20px;">镜头是我观察世界的切片。无论是记录真实的自然旷野，还是捕捉高品质开放世界游戏中的虚拟光影，这种跨越虚实的构图拆解与色彩感知，是我日常的审美训练。它潜移默化地沉淀下来，成为了我日后把控产品 UI/UX 体验时，最底层的直觉与标准。</p>
+            <p class="lang-en" style="font-size: 0.95rem; color: #666; max-width: 600px; margin-bottom: 20px; font-family: 'Inter', sans-serif;">The lens is my slice for observing the world. Whether documenting the real natural wilderness or capturing virtual lighting in high-quality open-world games, this cross-reality deconstruction of composition and color perception is my daily aesthetic training. It subtly precipitates, becoming my most fundamental intuition and standard when overseeing product UI/UX experiences.</p>
+        </div>
+        <div class="marquee-track animate-right">
+            <div class="marquee-item"><img src="https://img.heliar.top/file/1773243504818_mmexport1678085289133.jpg" alt="暖暖1"></div>
+            <div class="marquee-item"><img src="https://img.heliar.top/file/1773243485870_微信图片_20260311220208_65_33.jpg" alt="风景1"></div>
+            <div class="marquee-item"><img src="https://img.heliar.top/file/1773243475429_微信图片_20260311220207_64_33.jpg" alt="暖暖2"></div>
+            <div class="marquee-item"><img src="https://picsum.photos/600/400?random=33" alt="风景2"></div>
+            <div class="marquee-item"><img src="https://picsum.photos/600/400?random=30" alt="暖暖1"></div>
+            <div class="marquee-item"><img src="https://picsum.photos/600/400?random=31" alt="风景1"></div>
+            <div class="marquee-item"><img src="https://picsum.photos/600/400?random=32" alt="暖暖2"></div>
+            <div class="marquee-item"><img src="https://picsum.photos/600/400?random=33" alt="风景2"></div>
+        </div>
+        <div class="gallery-info" style="margin-top: 60px;">
+            <div style="background-color: #111; color: #fff; padding: 60px; border-radius: 4px;">
+                <h3 style="font-family: 'Noto Serif SC', serif; font-size: 2rem; margin: 0 0 20px 0; color: #fff;"><span class="lang-zh">底层认知系统</span><span class="lang-en" style="font-family: 'Inter', sans-serif; font-weight: 600; letter-spacing: -0.02em;">Underlying Cognitive System</span></h3>
+                <p class="lang-zh" style="font-family: 'Inter', sans-serif; font-size: 1.05rem; line-height: 1.8; color: #bbb; max-width: 800px; margin: 0;">
+                    <strong>[ 严肃文学 & 哲学 / Literature & Philosophy ]</strong><br>闲暇时更偏爱阅读严肃文学和哲学。这对我而言是一个纯粹的“输入”过程，虽无显性的输出成果，但构成了我认知框架的基石。哲学训练了我探究事物本质与底层逻辑的理性；而优秀的文学作品则拓展了我对“具体的人”的理解边界，这正是我在面对真实业务时，保持用户同理心的重要燃料。
+                </p>
+                <p class="lang-en" style="font-family: 'Inter', sans-serif; font-size: 1.05rem; line-height: 1.8; color: #bbb; max-width: 800px; margin: 0;">
+                    <strong>[ Literature & Philosophy ]</strong><br>In my leisure time, I prefer reading serious literature and philosophy. For me, this is a pure "input" process; although there are no explicit output deliverables, it forms the cornerstone of my cognitive framework. Philosophy trains my rationality to explore the essence of things and underlying logic; while excellent literature expands my boundaries of understanding "concrete individuals," which is the crucial fuel for maintaining user empathy when facing real-world business scenarios.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="bottom-section">
+        <div style="width: 100%; display: flex; flex-direction: column; align-items: center; margin-top: 100px; padding-bottom: 120px; text-align: center;">
+            <div class="profile-photo-container">
+                <img src="https://img.heliar.top/file/1773230503041_profile.jpg" alt="田莹莹">
+            </div>
+        </div>
+        <div class="black-bar">
+            <div class="thanks"><span class="lang-zh">谢谢光临。</span><span class="lang-en">Thanks for visiting.</span></div>
+        </div>
+    </div>
+    
+    <div class="footer-nav">
+        <div class="nav-item active" id="nav-about" style="cursor: pointer;"><span class="lang-zh">关于</span><span class="lang-en">About</span><span class="nav-arrow">↗</span></div>
+        <div class="nav-item" id="nav-works" style="cursor: pointer;"><span class="lang-zh">作品</span><span class="lang-en">Works</span><span class="nav-arrow">↗</span></div>
+        <div class="nav-item" id="nav-more" style="cursor: pointer;"><span class="lang-zh">更多</span><span class="lang-en">More</span><span class="nav-arrow">↗</span></div>
+    </div>
+
+    <!-- 全局二维码模态框 -->
+    <div id="qr-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background-color: rgba(247, 247, 245, 0.95); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.4s ease; backdrop-filter: blur(5px);">
+        <div style="background: #fff; padding: 40px; border-radius: 4px; box-shadow: 0 20px 60px rgba(0,0,0,0.08); text-align: center; transform: translateY(20px); transition: transform 0.4s ease;" id="qr-card">
+            <img id="qr-modal-img" src="" alt="体验二维码" style="width: 240px; height: 240px; display: block; margin: 0 auto; object-fit: contain;">
+            <p style="font-family: 'Inter', sans-serif; font-size: 0.85rem; color: #888; margin-top: 20px; letter-spacing: 1px;"><span class="lang-zh">扫描二维码进行体验</span><span class="lang-en">Scan QR code to experience</span></p>
+        </div>
+        <div id="qr-close" style="margin-top: 30px; font-family: 'Inter', sans-serif; font-size: 0.9rem; color: #666; cursor: pointer; letter-spacing: 2px; transition: color 0.3s ease;"><span class="lang-zh">关闭 (Close)</span><span class="lang-en">Close</span></div>
+    </div>
+
+    <!-- Three.js 3D Fractal Tree Script -->
+    <script>
+        function isWebGLAvailable() {
+            try {
+                const canvas = document.createElement('canvas');
+                return !!(window.WebGLRenderingContext && (canvas.getContext('webgl') || canvas.getContext('experimental-webgl')));
+            } catch (e) {
+                return false;
+            }
+        }
+
+        if (isWebGLAvailable()) {
+            try {
+                const container = document.getElementById('canvas-container');
+                
+                // Scene setup
+                const scene = new THREE.Scene();
+                
+                // Camera setup
+                const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+                camera.position.set(0, 0, 45);
+                
+                // Renderer setup
+                const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+                container.appendChild(renderer.domElement);
+            
+            // Tree Generation
+            const positions = [];
+            const colors = [];
+            
+            // Colors for gradient: Root (Brown) -> Middle (Green) -> Tips (Orange)
+            const colorRoot = new THREE.Color(0x5C4033); // Dark Brown
+            const colorMid = new THREE.Color(0x2E8B57); // Sea Green
+            const colorTip = new THREE.Color(0xFF8C00); // Dark Orange
+            
+            function buildTree(startPoint, direction, length, depth, maxDepth) {
+                if (depth === 0) return;
+                
+                const endPoint = startPoint.clone().add(direction.clone().multiplyScalar(length));
+                
+                positions.push(startPoint.x, startPoint.y, startPoint.z);
+                positions.push(endPoint.x, endPoint.y, endPoint.z);
+                
+                // Calculate gradient colors based on depth with 3 color stops
+                const tStart = 1 - (depth / maxDepth);
+                const tEnd = 1 - ((depth - 1) / maxDepth);
+                
+                let cStart = new THREE.Color();
+                let cEnd = new THREE.Color();
+
+                // Smooth 3-stop gradient interpolation
+                if (tStart < 0.5) {
+                    cStart.lerpColors(colorRoot, colorMid, tStart * 2);
+                } else {
+                    cStart.lerpColors(colorMid, colorTip, (tStart - 0.5) * 2);
+                }
+
+                if (tEnd < 0.5) {
+                    cEnd.lerpColors(colorRoot, colorMid, tEnd * 2);
+                } else {
+                    cEnd.lerpColors(colorMid, colorTip, (tEnd - 0.5) * 2);
+                }
+                
+                colors.push(cStart.r, cStart.g, cStart.b);
+                colors.push(cEnd.r, cEnd.g, cEnd.b);
+                
+                // Branching logic
+                const numBranches = 3;
+                const spreadAngle = Math.PI / 4.5; // Spread of the branches
+                
+                for (let i = 0; i < numBranches; i++) {
+                    const branchDir = direction.clone();
+                    // Create an orthogonal axis to rotate around
+                    const axis = new THREE.Vector3(1, 0, 0).applyAxisAngle(direction, (i * Math.PI * 2) / numBranches);
+                    branchDir.applyAxisAngle(axis, spreadAngle);
+                    
+                    buildTree(endPoint, branchDir, length * 0.72, depth - 1, maxDepth);
+                }
+            }
+            
+            // Start the tree inverted (pointing down)
+            const maxDepth = 6;
+            const startPos = new THREE.Vector3(0, 15, 0); // Adjusted starting position so it doesn't overlap top text
+            const initialDir = new THREE.Vector3(0, -1, 0); // Point downwards
+            
+            // Adjusted length to 10.5 so the entire tree is comfortably visible on the first screen
+            buildTree(startPos, initialDir, 10.5, maxDepth, maxDepth);
+            
+            // Create Geometry and Material
+            const geometry = new THREE.BufferGeometry();
+            geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+            geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+            
+            const material = new THREE.LineBasicMaterial({
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.85,
+                linewidth: 1
+            });
+            
+            const tree = new THREE.LineSegments(geometry, material);
+            scene.add(tree);
+            
+            // Animation Loop
+            function animate() {
+                requestAnimationFrame(animate);
+                // Slow, uniform rotation around Y axis
+                tree.rotation.y += 0.003;
+                renderer.render(scene, camera);
+            }
+            
+            animate();
+            
+            // Handle Window Resize
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+        } catch (error) {
+            // Fallback for environments without WebGL
+            const container = document.getElementById('canvas-container');
+            if (container) {
+                container.style.background = 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)';
+                container.style.opacity = '0.5';
+            }
+        }
+        } else {
+            // Fallback for environments without WebGL
+            const container = document.getElementById('canvas-container');
+            if (container) {
+                container.style.background = 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)';
+                container.style.opacity = '0.5';
+            }
+        }
+
+        // 空间跳跃转场逻辑
+        document.addEventListener('DOMContentLoaded', () => {
+          const navItems = document.querySelectorAll('.nav-item');
+          
+          // 定义三个区块的 ID 映射
+          const sectionMap = {
+            'nav-about': 'hero-section', // 假设你的首屏 3D 树区域有一个 id="hero-section"，如果没有请自行加上
+            'nav-works': 'works-section',
+            'nav-more':  'more-section'
+          };
+
+          navItems.forEach(item => {
+            item.addEventListener('click', (e) => {
+              e.preventDefault();
+
+              // 1. 墨水晕染与激活状态切换
+              navItems.forEach(nav => nav.classList.remove('active'));
+              item.classList.add('active');
+              
+              // 2. 获取目标区域
+              const targetId = sectionMap[item.id];
+              const targetSection = document.getElementById(targetId);
+              
+              if (targetSection) {
+                // 3. 触发空间跳跃错觉：页面模糊后退
+                document.body.classList.add('jump-out');
+                
+                // 4. 等待 300 毫秒（模糊产生后），极速跳转到目标位置，并取消模糊，产生“弹射”到眼前的感觉
+                setTimeout(() => {
+                  // 瞬间跳转到目标位置，不使用 smooth
+                  window.scrollTo(0, targetSection.offsetTop);
+                  
+                  // 解除模糊和缩放，产生回弹感
+                  document.body.classList.remove('jump-out');
+                }, 300); // 这个时间可以微调，感受那种节奏感
+              }
+            });
+          });
+
+          // 二维码全屏模态框交互逻辑
+          const qrTriggers = document.querySelectorAll('.qr-trigger');
+          const qrModal = document.getElementById('qr-modal');
+          const qrModalImg = document.getElementById('qr-modal-img');
+          const qrCard = document.getElementById('qr-card');
+          const qrClose = document.getElementById('qr-close');
+
+          // 打开模态框
+          qrTriggers.forEach(trigger => {
+            trigger.addEventListener('click', (e) => {
+              e.stopPropagation(); // 阻止事件冒泡
+              const qrUrl = trigger.getAttribute('data-qr');
+              qrModalImg.src = qrUrl;
+
+              // 激流动效
+              qrModal.style.pointerEvents = 'auto';
+              qrModal.style.opacity = '1';
+              qrCard.style.transform = 'translateY(0)';
+            });
+          });
+
+          // 关闭模态框函数
+          const closeModal = () => {
+            qrModal.style.opacity = '0';
+            qrModal.style.pointerEvents = 'none';
+            qrCard.style.transform = 'translateY(20px)';
+          };
+
+          // 点击关闭按钮关闭
+          if (qrClose) qrClose.addEventListener('click', closeModal);
+
+          // 点击背景遮罩关闭
+          if (qrModal) {
+            qrModal.addEventListener('click', (e) => {
+              if (e.target === qrModal) {
+                closeModal();
+              }
+            });
+          }
+
+          // 中英文切换逻辑
+          const langBtn = document.getElementById('lang-btn');
+          if (langBtn) {
+            langBtn.addEventListener('click', () => {
+              const isEn = document.body.classList.toggle('en-mode');
+              langBtn.textContent = isEn ? '中文 / EN' : 'EN / 中文';
+            });
+          }
+        });
+    </script>
+</body>
+</html>
